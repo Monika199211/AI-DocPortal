@@ -1,1 +1,8 @@
 env/
+.env
+DOCUMENT_PORTAL_MONIKA.egg-info
+venv/
+__pycache__/
+logs/
+*.__pycache__/
+test.py
