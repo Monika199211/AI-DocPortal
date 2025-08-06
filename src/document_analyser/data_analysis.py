@@ -6,7 +6,7 @@ from exception.custom_exception import DocumentPortalException
 from model.models import *
 from langchain_core.output_parsers import JsonOutputParser
 from langchain.output_parsers import OutputFixingParser
-from prompt.prompt_library import PROMPT_REGISTRY
+from prompt.prompt_library import PROMPT_REGISTRY # type: ignore
 
 class DocumentAnalyzer:
     """
@@ -54,6 +54,6 @@ class DocumentAnalyzer:
 
         except Exception as e:
             self.log.error("Metadata analysis failed", error=str(e))
-            raise DocumentPortalException("Metadata extraction failed") from e
+            raise DocumentPortalException("Metadata extraction failed",sys)
         
     
