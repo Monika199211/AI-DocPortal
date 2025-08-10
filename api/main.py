@@ -8,7 +8,7 @@ from typing import List, Optional, Any, Dict
 
 from src.document_ingestion.data_ingestion import (
     DocHandler,
-    DocumnetComparator,
+    DocumentComparator,
     ChatIngestor,
     FaissManager
 )
@@ -24,6 +24,10 @@ from src.document_chat.retrieval import ConversationalRAG
 #     StaticFiles(directory=BASE_DIR / "static"),
 #     name="static"
 # )
+
+FAISS_BASE = os.getenv("FAISS_BASE", "faiss_index")
+UPLOAD_BASE = os.getenv("UPLOAD_BASE", "data")
+
 app = FastAPI(title="Document Portal API", version="0.1")
 
 app.add_middleware(
@@ -56,14 +60,12 @@ class FastAPIFileAdapter:
         self._uf.file.seek(0)
         return self._uf.file.read()
 
-def _read_pdf_via_handler(handler: DocHandler, path:str) -> str:
-    """
-    Helper function to read PDF using DocHandler.
-    """
-    try:
-        pass
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error reading PDF: {str(e)}")
+def _read_pdf_via_handler(handler: DocHandler, path: str) -> str:
+    if hasattr(handler, "read_pdf"):
+        return handler.read_pdf(path)  # type: ignore
+    if hasattr(handler, "read_"):
+        return handler.read_(path)  # type: ignore
+    raise RuntimeError("DocHandler has neither read_pdf nor read_ method.")
     
 @app.post("/analyze")
 async def analyze_document(file: UploadFile = File(...)) -> Any:
@@ -82,7 +84,7 @@ async def analyze_document(file: UploadFile = File(...)) -> Any:
 @app.post("/compare")
 async def compare_documents(reference: UploadFile = File(...), actual: UploadFile = File(...)) -> Any:
     try:
-        dc = DocumnetComparator()
+        dc = DocumentComparator()
         ref_path, act_path = dc.save_uploaded_files(FastAPIFileAdapter(reference), FastAPIFileAdapter(actual))
         _ = ref_path, act_path
         combined_text = dc.combine_documents()
@@ -111,7 +113,7 @@ async def chat_build_index(
             use_session_dirs=use_session_dirs,
             session_id=session_id or None,
         )
-        ci.build_retriever(wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k)
+        ci.built_retriver(wrapped, chunk_size=chunk_size, chunk_overlap=chunk_overlap, k=k)
         return {"session_id": ci.session_id, "k": k, "use_session_dirs": use_session_dirs}
     except HTTPException:
         raise
