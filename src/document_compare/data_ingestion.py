@@ -4,7 +4,7 @@ from pathlib import Path
 import fitz
 from datetime import datetime, timezone
 from logger.custom_logger import CustomLogger
-from exception.custom_exception import DocumentPortalException
+from exception.custom_exception_archive import DocumentPortalException
 
 
 class DocumentIngestion:
