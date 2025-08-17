@@ -12,14 +12,12 @@ class Metadata(BaseModel):
     Language: str
     PageCount: Union[int, str]  # Can be "Not Available"
     SentimentTone: str
-
 class ChangeFormat(BaseModel):
     Page: str
     Changes: str
 
 class SummaryResponse(RootModel[list[ChangeFormat]]):
     pass
-
 class PromptType(str, Enum):
     DOCUMENT_ANALYSIS = "document_analysis"
     DOCUMENT_COMPARISON = "document_comparison"
