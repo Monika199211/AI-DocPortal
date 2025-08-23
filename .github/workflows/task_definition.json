@@ -1,7 +1,7 @@
 {
   "family": "documentportaltd",
   "networkMode": "awsvpc",
-  "executionRoleArn": "arn:aws:iam::685057748560:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::459497895986:role/ecsTaskExecutionRole",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "1024",
   "memory": "8192",
@@ -29,26 +29,20 @@
       "secrets": [
         {
           "name": "GROQ_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:685057748560:secret:GROQ_API_KEY"
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:459497895986:secret:GROQ_API_KEY"
         },
-        {
-          "name": "HF_TOKEN",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:685057748560:secret:HF_TOKEN"
-        },
+        
         {
           "name": "GOOGLE_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:685057748560:secret:GOOGLE_API_KEY"
-        },
-        {
-          "name": "LANGCHAIN_API_KEY",
-          "valueFrom": "arn:aws:secretsmanager:us-east-1:685057748560:secret:LANGCHAIN_API_KEY"
+          "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:459497895986:secret:GOOGLE_API_KEY"
         }
+        
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
         "options": {
           "awslogs-group": "/ecs/documentportaltd",
-          "awslogs-region": "us-east-1",
+          "awslogs-region": "ap-southeast-2",
           "awslogs-stream-prefix": "ecs",
           "awslogs-create-group": "false",
           "mode": "non-blocking",
