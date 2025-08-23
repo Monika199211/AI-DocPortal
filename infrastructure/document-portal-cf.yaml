@@ -1,5 +1,6 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/awslabs/goformation/master/schema/cloudformation.schema.json
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CloudFormation template to create ECR + ECS infra for Document Portal
+Description: Full ECS + ECR + VPC Infra for Document Portal with secrets and logging
 
 Parameters:
   VpcCIDR:
@@ -19,18 +20,21 @@ Parameters:
     Description: ECR Image URI to use for container
 
 Resources:
+
+  ### ECR Repository
   MyECRRepository:
     Type: AWS::ECR::Repository
     Properties:
       RepositoryName: documentportal
       ImageScanningConfiguration:
-        scanOnPush: true
+        ScanOnPush: true
       ImageTagMutability: MUTABLE
 
+  ### VPC, Subnets, Internet Gateway
   MyVPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VpcCIDR
+      CidrBlock: !Ref VpcCIDR 
       EnableDnsSupport: true
       EnableDnsHostnames: true
       Tags:
@@ -40,7 +44,7 @@ Resources:
   Subnet1:
     Type: AWS::EC2::Subnet
     Properties:
-      VpcId: !Ref MyVPC
+      VpcId: !Ref MyVPC 
       CidrBlock: !Ref Subnet1CIDR
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: true
@@ -93,14 +97,17 @@ Resources:
       SubnetId: !Ref Subnet2
       RouteTableId: !Ref RouteTable
 
+  ### ECS Cluster
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
       ClusterName: document-portal-cluster
 
+  ### ECS Execution Role with Secrets + Logs
   ECSExecutionRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: ecsTaskExecutionRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -108,13 +115,27 @@ Resources:
             Principal:
               Service: ecs-tasks.amazonaws.com
             Action: sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+      Policies:
+        - PolicyName: ecs-secrets-logs-access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - logs:CreateLogGroup
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: "*"
 
+  ### Security Group
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Allow access to container port
+      GroupDescription: Allow HTTP access to container
       VpcId: !Ref MyVPC
       SecurityGroupIngress:
         - IpProtocol: tcp
@@ -122,12 +143,13 @@ Resources:
           ToPort: 8080
           CidrIp: 0.0.0.0/0
 
+  ### ECS Task Definition
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     Properties:
       Family: documentportaltd
-      Cpu: 256
-      Memory: 512
+      Cpu: "1024"
+      Memory: "8192"
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
@@ -135,9 +157,21 @@ Resources:
       ContainerDefinitions:
         - Name: document-portal-container
           Image: !Ref ImageUrl
+          Essential: true
           PortMappings:
             - ContainerPort: 8080
-          Essential: true
+          Environment:
+            - Name: LANGCHAIN_PROJECT
+              Value: DOCUMENT PORTAL
+          Secrets:
+            - Name: GROQ_API_KEY
+              ValueFrom: arn:aws:secretsmanager:us-east-1:685057748560:secret:GROQ_API_KEY
+            - Name: HF_TOKEN
+              ValueFrom: arn:aws:secretsmanager:us-east-1:685057748560:secret:HF_TOKEN
+            - Name: GOOGLE_API_KEY
+              ValueFrom: arn:aws:secretsmanager:us-east-1:685057748560:secret:GOOGLE_API_KEY
+            - Name: LANGCHAIN_API_KEY
+              ValueFrom: arn:aws:secretsmanager:us-east-1:685057748560:secret:LANGCHAIN_API_KEY
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -145,6 +179,7 @@ Resources:
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
 
+  ### ECS Service
   ECSService:
     Type: AWS::ECS::Service
     DependsOn: AttachGateway
