@@ -101,13 +101,13 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: document-portal-cluster
+      ClusterName: document-portal-cluster1
 
   ### ECS Execution Role with Secrets + Logs
   ECSExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: AWSServiceRoleForECS
+      RoleName: ecsTaskExecutionRole
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -155,7 +155,7 @@ Resources:
         - FARGATE
       ExecutionRoleArn: !GetAtt ECSExecutionRole.Arn
       ContainerDefinitions:
-        - Name: document-portal-container
+        - Name: document-portal-container1
           Image: !Ref ImageUrl
           Essential: true
           PortMappings:
