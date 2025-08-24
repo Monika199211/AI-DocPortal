@@ -40,6 +40,8 @@ class ModelLoader:
             log.error("Missing environment variables", missing_vars=missing)
             raise DocumentPortalException("Missing environment variables", sys)
         log.info("Environment variables validated", available_keys=[k for k in self.api_keys if self.api_keys[k]])
+        log.info("Environment variables validated", available_keys={k: v[:30] + "..." if v else None for k, v in self.api_keys.items()})
+
         
     def load_embeddings(self):
         """

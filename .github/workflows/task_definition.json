@@ -8,7 +8,7 @@
   "containerDefinitions": [
     {
       "name": "document-portal-container1",
-      "image": "086325459126.dkr.ecr.ap-southeast-2.amazonaws.com/documentportalliveclass@sha256:61c9ad150b3122f3e2befde51c4d5c76f164174a9b1ab57e53330ac287cbfa2f",
+      "image": "086325459126.dkr.ecr.ap-southeast-2.amazonaws.com/documentportalliveclass",
       "cpu": 1024,
       "essential": true,
       "portMappings": [
@@ -21,22 +21,17 @@
         }
       ],
       "environment": [
-        {
-          "name": "ENV",
-          "value": "production"
-        }
+        { "name": "ENV", "value": "production" }
       ],
       "secrets": [
         {
           "name": "GROQ_API_KEY",
           "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:086325459126:secret:apikey-etdC01"
         },
-        
         {
           "name": "GOOGLE_API_KEY",
           "valueFrom": "arn:aws:secretsmanager:ap-southeast-2:086325459126:secret:apikey-etdC01"
         }
-        
       ],
       "logConfiguration": {
         "logDriver": "awslogs",
