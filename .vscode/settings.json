@@ -16,5 +16,10 @@
     "!And",
     "!Or",
     "!Base64"
-  ]
+  ],
+  "github-actions.secrets": {
+    "AWS_ACCESS_KEY_ID": "placeholder",
+    "AWS_SECRET_ACCESS_KEY": "placeholder"
+  }
 }
+
