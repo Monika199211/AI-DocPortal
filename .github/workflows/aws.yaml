@@ -82,7 +82,7 @@ jobs:
         id: render-task
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: task_definition.json
+          task-definition: ${{ env.ECS_TASK_DEFINITION }}
           container-name: document-portal-container1
           image: 086325459126.dkr.ecr.ap-southeast-2.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
 
