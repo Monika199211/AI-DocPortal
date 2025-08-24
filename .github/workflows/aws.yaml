@@ -83,8 +83,8 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: ${{ env.ECS_TASK_DEFINITION }}
-          container-name: document-portal-container1
-          image: 086325459126.dkr.ecr.ap-southeast-2.amazonaws.com/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ needs.build-and-push.outputs.image }}
 
 
       - name: Deploy to ECS
